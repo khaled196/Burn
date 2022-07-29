@@ -57,10 +57,11 @@ def create_training_data():
                 class_num = CATEGORIES.index(category)  #get the classification  (0 , 1). 0= Burned skin 1=Normal_skin
                 for img in tqdm(os.listdir(path)):  # iterate over each image in normal skin
                     try:
-                        img_array = cv2.imread(os.path.join(path,img))  # convert to array
+                        img_array = mpimg.imread(os.path.join(path,img))  # convert to array
                         rotate_img=rotate_bound(img_array,num)
                         new_array = cv2.resize(rotate_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-                        normal_skin.append([new_array, class_num])
+                        extraction= cv2.imread(os.path.join(path,img))
+                        normal_skin.append([new_array, class_num, extraction])
                     except Exception as e:  # in the interest in keeping the output clean...
                         pass
                         #except OSError as e:
@@ -73,10 +74,11 @@ def create_training_data():
                 class_num = CATEGORIES.index(category)  #get the classification  (0 , 1). 0= Burned skin 1=Normal_skin
                 for img in tqdm(os.listdir(path)):  # iterate over each image in Burned skin
                     try:
-                        img_array = cv2.imread(os.path.join(path,img))  # convert to array
+                        img_array = mpimg.imread(os.path.join(path,img))  # convert to array
                         rotate_img=rotate_bound(img_array,num)
                         new_array = cv2.resize(rotate_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-                        burned_skin.append([new_array, class_num])
+                        extraction= cv2.imread(os.path.join(path,img))
+                        burned_skin.append([new_array, class_num, extraction])
                     except Exception as e:  # in the interest in keeping the output clean...
                         pass
                         #except OSError as e:
@@ -129,9 +131,11 @@ x = x/255.0
 # Burned skin 
 burned_skin_x=[]
 burned_skin_y=[]
-for features, label in burned_skin_ev:#the list has tow part first is the image the second is the label
+burned_extract=[]
+for features, label, ex in burned_skin_ev:#the list has tow part first is the image the second is the label
     burned_skin_x.append(features)
     burned_skin_y.append(label)
+    burned_extract.append(ex)
 #because we cant feed a list into the CNN we have to convert it into array
 hot_burned_skin_y= to_one_hot(burned_skin_y)
 
@@ -145,9 +149,11 @@ burned_skin_x=np.array(burned_skin_x).reshape(-1,IMG_SIZE,IMG_SIZE,3)
 # Normal skin 
 normal_skin_x=[]
 normal_skin_y=[]
-for features, label in normal_skin_ev:#the list has tow part first is the image the second is the label
+normal_extract=[]
+for features, label, ex in normal_skin_ev:#the list has tow part first is the image the second is the label
     normal_skin_x.append(features)
     normal_skin_y.append(label)
+    normal_extract.append(ex)
 #because we cant feed a list into the CNN we have to convert it into array
 hot_normal_skin_y= to_one_hot(normal_skin_y)
 normal_skin_x=np.array(normal_skin_x).reshape(-1,IMG_SIZE,IMG_SIZE,3)
@@ -157,10 +163,11 @@ normal_skin_x=np.array(normal_skin_x).reshape(-1,IMG_SIZE,IMG_SIZE,3)
 # Test data
 x_test=[]
 y_test=[]
-for features, label in test_data:#the list has tow part first is the image the second is the label
+for features, label, ex in test_data:#the list has tow part first is the image the second is the label
     x_test.append(features)
     y_test.append(label)
 #because we cant feed a list into the CNN we have to convert it into array
+hot_y_test = to_one_hot(y_test)
 x_test=np.array(x_test).reshape(-1,IMG_SIZE,IMG_SIZE,3)
 x_test=x_test/255.0
 
@@ -186,6 +193,11 @@ pickle_out = open(os.path.join(folder,"y_test.pickle"),"wb")
 pickle.dump(y_test, pickle_out)
 pickle_out.close()
 
+pickle_out = open(os.path.join(folder,"hot_y_test.pickle"),"wb")
+pickle.dump(hot_y_test, pickle_out)
+pickle_out.close()
+
+
 pickle_out = open(os.path.join(folder,"burned_skin_x.pickle"),"wb")
 pickle.dump(burned_skin_x, pickle_out)
 pickle_out.close()
@@ -210,5 +222,21 @@ pickle_out.close()
 pickle_out = open(os.path.join(folder,"normal_skin_y.pickle"),"wb")
 pickle.dump(normal_skin_y, pickle_out)
 pickle_out.close()
+
+# extract 
+
+pickle_out = open(os.path.join(folder,"Extract_burned.pickle"),"wb")
+pickle.dump(burned_extract, pickle_out)
+pickle_out.close()
+
+pickle_out = open(os.path.join(folder,"Extract_normal.pickle"),"wb")
+pickle.dump(normal_extract, pickle_out)
+pickle_out.close()
+
+
+
+
+
+
 
 

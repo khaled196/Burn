@@ -48,7 +48,32 @@ hot_normal_skin_y = pickle.load(pickle_in)
 pickle_in = open(os.path.join(data,"normal_skin_y.pickle"),"rb")
 normal_skin_y = pickle.load(pickle_in)
 
+#extract
+
+pickle_in = open(os.path.join(data,"Extract_burned.pickle"),"rb")
+burned_extract = pickle.load(pickle_in)
+
+pickle_in = open(os.path.join(data,"Extract_normal.pickle"),"rb")
+normal_extract = pickle.load(pickle_in)
+
+
+
+
+
+
+
+
+
 CATEGORIES=["burned_skin","Normal_skin"] # creat a list for labiling  creat a list for labiling
+
+
+def extract(image)
+  hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+  lower = np.array([0, 50, 0])
+  upper = np.array([179, 240, 255])
+  mask = cv2.inRange(hsv, lower, upper)
+  result = cv2.bitwise_and(burned_skin_x[i], burned_skin_x[i], mask=mask)
+  return result
 
 # OUT-DIR
 os.chdir(sys.argv[2])
@@ -68,14 +93,11 @@ for i in range(len(burned_skin_y)):
         #plt.text(x=40, y=-10, s=CATEGORIES[int(np.argmax(result[i]))], fontsize=18, color=font_color)
         plt.imshow(burned_skin_x[i],cmap='gray')
         fig.savefig('mispredicted_burn_skin'+str(i)+ '.png')
-        hsv = cv2.cvtColor(burned_skin_x[i], cv2.COLOR_BGR2HSV)
-        lower = np.array([0, 50, 0])
-        upper = np.array([179, 240, 255])
-        mask = cv2.inRange(hsv, lower, upper)
-        result = cv2.bitwise_and(burned_skin_x[i], burned_skin_x[i], mask=mask)
-        cv2.imwrite('extracted_mispredicted_burn_skin'+str(i)+ '.png', result)
         plt.close()
-#        plt.show()
+        extract(burned_extract[i])
+        cv2.imwrite('extracted_mispredicted_burn_skin'+str(i)+ '.png', result)
+        cv2.waitKey(0)
+
 
     elif burned_skin_y[i] == np.argmax(result[i]):
         fig= plt.figure()
@@ -84,14 +106,10 @@ for i in range(len(burned_skin_y)):
         #plt.text(x=-20, y=-10, s=CATEGORIES[int(burned_skin_y[i])], fontsize=18, color="black")
         plt.imshow(burned_skin_x[i],cmap='gray')
         plt.savefig('burnd_correct_predicted'+str(i)+ '.png')
-        hsv = cv2.cvtColor(burned_skin_x[i], cv2.COLOR_BGR2HSV)
-        lower = np.array([0, 50, 0])
-        upper = np.array([179, 240, 255])
-        mask = cv2.inRange(hsv, lower, upper)
-        result = cv2.bitwise_and(burned_skin_x[i], burned_skin_x[i], mask=mask)
-        cv2.imwrite('extracted_burnd_correct_predicted'+str(i)+ '.png', result)
         plt.close()
-#        plt.show()
+        extract(burned_extract[i])
+        cv2.imwrite('extracted_correctly_predicted_burn_skin'+str(i)+ '.png', result)
+        cv2.waitKey(0)
 
 
 # normal skin evaluation
@@ -112,14 +130,10 @@ for i in range(len(normal_skin_y)):
         #plt.text(x=40, y=-10, s=CATEGORIES[int(np.argmax(result[i]))], fontsize=18, color=font_color)
         plt.imshow(normal_skin_x[i],cmap='gray')
         plt.savefig('nor_miss_predicted'+str(i)+ '.png')
-        hsv = cv2.cvtColor(burned_skin_x[i], cv2.COLOR_BGR2HSV)
-        lower = np.array([0, 50, 0])
-        upper = np.array([179, 240, 255])
-        mask = cv2.inRange(hsv, lower, upper)
-        result = cv2.bitwise_and(burned_skin_x[i], burned_skin_x[i], mask=mask)
-        cv2.imwrite('extracted_nor_mispredicted'+str(i)+ '.png', result)
         plt.close()
-#        plt.show()
+        extract(normal_extract[i])
+        cv2.imwrite('extracted_mispredicted_normal_skin'+str(i)+ '.png', result)
+        cv2.waitKey(0)
 
     else:
         fig= plt.figure()
@@ -128,14 +142,10 @@ for i in range(len(normal_skin_y)):
         #plt.text(x=-20, y=-10, s=CATEGORIES[int(normal_skin_y[i])], fontsize=18, color="black")
         plt.imshow(normal_skin_x[i],cmap='gray')
         plt.savefig('nor_correct_predicted'+str(i)+ '.png')
-        hsv = cv2.cvtColor(burned_skin_x[i], cv2.COLOR_BGR2HSV)
-        lower = np.array([0, 50, 0])
-        upper = np.array([179, 240, 255])
-        mask = cv2.inRange(hsv, lower, upper)
-        result = cv2.bitwise_and(burned_skin_x[i], burned_skin_x[i], mask=mask)
-        cv2.imwrite('extracted_nor_correct_predicted'+str(i)+ '.png', result)
         plt.close()
-#        plt.show()
+        extract(normal_extract[i])
+        cv2.imwrite('extracted_correctly_predicted_normal_skin'+str(i)+ '.png', result)
+        cv2.waitKey(0)
 
 
 
@@ -168,6 +178,13 @@ fig.patch.set_facecolor('xkcd:white')
 sn.heatmap(df_cm, annot=True)
 plt.savefig('Confusion_matrix.png')
 
+
+
+
+
+
+pickle_in = open(os.path.join(data,"hot_y_test.pickle"),"rb")
+y_test = pickle.load(pickle_in)
 
 
 #Results ROC CURVE
